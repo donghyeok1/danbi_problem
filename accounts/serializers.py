@@ -2,6 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 import re
 from rest_framework.exceptions import ValidationError
+from django.core.mail.message import EmailMessage
 
 User = get_user_model()
 
@@ -15,11 +16,17 @@ class SignupSerializer(serializers.ModelSerializer):
             raise ValidationError('유저의 비밀번호는 8글자 이상이며 특수문자, 숫자를 포함해야 합니다.')
         return value
     def create(self, validated_data):
-        user = User.objects.create(email=validated_data['email'])
+        email = validated_data['email']
+        user = User.objects.create(email=email)
         user.set_password(validated_data['password'])
         # db에 암호화해서 저장.
-
         user.save()
+        email_send = EmailMessage(
+            '회원가입',  # 이메일 제목
+            '회원가입이 완료되었습니다.',  # 내용
+            to=[email],  # 받는 이메일
+        )
+        email_send.send()
         return user
     class Meta:
         model = User
