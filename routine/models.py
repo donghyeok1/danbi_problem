@@ -34,7 +34,7 @@ class RoutineResult(TimestampedModel):
     )
     routine_result_id = models.AutoField(primary_key=True)
     routine_id = models.ForeignKey(Routine, related_name='routine_result_set', on_delete=models.CASCADE)
-    result = models.CharField(max_length=5, choices=RESULT_CHOICE)
+    result = models.CharField(max_length=5, choices=RESULT_CHOICE, default='NOT')
     is_deleted = models.BooleanField(default=False)
 
 class RoutineDay(TimestampedModel):
