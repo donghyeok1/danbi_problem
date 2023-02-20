@@ -24,6 +24,9 @@ class SignupSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'email', 'password']
 
+    def to_representation(self, instance):
+        res = {"account_id" : instance.pk}
+        return res
 
     def validate_password(self, data):
         if re.match(r"^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]{8,}$", data) == None:
@@ -36,6 +39,7 @@ class SignupSerializer(serializers.ModelSerializer):
         if User.objects.filter(email=data).exists():
             raise serializers.ValidationError("이미 존재하는 이메일입니다.")
         return data
+
     def create(self, validated_data):
         email = validated_data['email']
         user = User.objects.create(email=email)

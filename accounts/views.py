@@ -15,6 +15,19 @@ class SignupView(CreateAPIView):
     serializer_class = SignupSerializer
     permission_classes = [AllowAny]
 
+    def create(self, request, *args, **kwargs):
+        response = super(SignupView, self).create(request, *args, **kwargs)
+        data = {
+            "data": response.data,
+            "message": {
+                "msg": "You have successfully created the account.",
+                "status": "ACCOUNT_CREATE_OK"
+            }
+        }
+
+        response.data = data
+        return response
+
 class LoginView(APIView):
     queryset = User.objects.all()
     serializer_class = LoginSerializer
