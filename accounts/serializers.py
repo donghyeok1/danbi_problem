@@ -28,17 +28,19 @@ class SignupSerializer(serializers.ModelSerializer):
         res = {"account_id" : instance.pk}
         return res
 
-    def validate_password(self, data):
-        if re.match(r"^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]{8,}$", data) == None:
-            # (알파벳이 있고)(숫자가 있고)(특수문자가 있으면)8자 이상의 해당 문자열을 입력받는다.
-            # 그래서 특수문자에 넣고싶은 문자가 더 있으면 여기에 추가해주면 된다. 양쪽에 다 추가해야함!
-            raise ValidationError('유저의 비밀번호는 8글자 이상이며 특수문자, 숫자를 포함해야 합니다.')
-        return data
+    def validate_email(self, value):
+        email_regex = re.compile('^[a-zA-Z0-9+-_.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$')
+        if not email_regex.match(value):
+            raise serializers.ValidationError("이메일 형식이 아닙니다.")
+        return email_regex
 
-    def validate_email(self, data):
-        if User.objects.filter(email=data).exists():
-            raise serializers.ValidationError("이미 존재하는 이메일입니다.")
-        return data
+    def validate_password(self, value):
+        password_regex = re.compile("^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]{8,}$")
+
+        if not password_regex.match(value):
+            raise ValidationError('유저의 비밀번호는 8글자 이상이며 특수문자, 숫자를 포함해야 합니다.')
+        return password_regex
+
 
     def create(self, validated_data):
         email = validated_data['email']

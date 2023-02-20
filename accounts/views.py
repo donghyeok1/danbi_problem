@@ -41,7 +41,7 @@ class LoginView(APIView):
         if serializer.is_valid():
             return JsonResponse(serializer.validated_data, status=status.HTTP_200_OK)
         else:
-            return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
 
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
