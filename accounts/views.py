@@ -6,7 +6,7 @@ from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-
+from django.core.mail.message import EmailMessage
 from .serializers import SignupSerializer, LoginSerializer
 
 User = get_user_model()
@@ -27,6 +27,8 @@ class SignupView(CreateAPIView):
 
         response.data = data
         return response
+
+
 
 class LoginView(APIView):
     queryset = User.objects.all()

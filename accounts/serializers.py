@@ -54,6 +54,8 @@ class SignupSerializer(serializers.ModelSerializer):
         email_send.send()
         return user
 
+
+
 class LoginSerializer(serializers.ModelSerializer):
     email = serializers.CharField(max_length=30)
     password = serializers.CharField(max_length=30, write_only=True)

@@ -1,4 +1,3 @@
-from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.fields import ListField
 from datetime import datetime
@@ -47,12 +46,27 @@ class RoutineCreateUpdateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         days = validated_data.pop('days')
         user = self.context['request'].user
-        routine_instance = Routine.objects.create(account_id=user, **validated_data)
+
+        routine = Routine(
+            account_id=user,
+            **validated_data
+        )
+        routine.save()
 
         for day in days:
-            RoutineDay.objects.create(routine_id=routine_instance, day=day)
+            routine_day = RoutineDay(
+                routine_id=routine,
+                day=day
+            )
+            routine_day.save()
 
-        return routine_instance
+        routine_result = RoutineResult(
+            routine_id=routine,
+            result='NOT'
+        )
+        routine_result.save()
+
+        return routine
 
     def update(self, instance, validated_data):
         days = validated_data.pop('days')
@@ -60,6 +74,7 @@ class RoutineCreateUpdateSerializer(serializers.ModelSerializer):
         instance.category = validated_data.get('category', instance.category)
         instance.goal = validated_data.get('goal', instance.goal)
         instance.alarm = validated_data.get('is_alarm', instance.is_alarm)
+        # client에서 특정 데이터를 보내주지 않으면 원래 데이터로 치환.
 
         day_pre_set = set(days)
         day_prev_set = set()
@@ -78,20 +93,21 @@ class RoutineCreateUpdateSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-class RoutineResultCreateUpdateDeleteSerializer(serializers.ModelSerializer):
+
+
+class RoutineResultUpdateDeleteSerializer(serializers.ModelSerializer):
     class Meta:
         model = RoutineResult
-        fields = ['routine_id', 'result', 'is_deleted']
+        fields = ['result', 'is_deleted']
 
     def to_representation(self, instance):
         res = {"routine_result_id" : instance.routine_result_id}
         return res
 
-    def create(self, validated_data):
-        try:
-            routine_result_instance = RoutineResult.objects.get(routine_id=validated_data['routine_id'])
-            raise serializers.ValidationError("이미 결과가 존재합니다.")
-        except RoutineResult.DoesNotExist:
-            routine_result_instance = RoutineResult.objects.create(**validated_data)
-            return routine_result_instance
+    def update(self, instance, validated_data):
+        instance.result = validated_data.get('result', instance.result)
+        instance.is_deleted = validated_data.get('is_deleted', instance.is_deleted)
+        instance.save()
+
+        return instance
 

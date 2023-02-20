@@ -16,16 +16,23 @@ routine_list = views.RoutineViewSet.as_view({
 
 routine_detail = views.RoutineViewSet.as_view({
     'put' : 'update',
-    'get' : 'retrieve'
+    'get' : 'retrieve',
+    'delete' : 'destroy'
 })
 
 routine_result_list = views.RoutineResultViewSet.as_view({
     'get' : 'list',
-    'post' : 'create',
+})
+
+routine_result_detail = views.RoutineResultViewSet.as_view({
+    'get' : 'retrieve',
+    'put' : 'update',
+    'delete' : 'destroy'
 })
 
 urlpatterns =[
     path('routines/', routine_list, name='routine-list'),
-    path('routines/<int:id>/', routine_detail, name='routine-detail'),
+    path('routines/<int:pk>/', routine_detail, name='routine-detail'),
     path('routines/<int:pk>/results/', routine_result_list, name='routine-result-list'),
+    path('routines/<int:id>/results/<int:pk>/', routine_result_detail, name='routine-result-detail'),
 ]
