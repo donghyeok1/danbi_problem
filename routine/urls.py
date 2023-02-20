@@ -30,6 +30,7 @@ routine_result_detail = views.RoutineResultViewSet.as_view({
     'delete' : 'destroy'
 })
 
+
 urlpatterns =[
     path('routines/', routine_list, name='routine-list'),
     path('routines/<int:pk>/', routine_detail, name='routine-detail'),

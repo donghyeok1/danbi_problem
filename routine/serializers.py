@@ -110,4 +110,3 @@ class RoutineResultUpdateDeleteSerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
-
