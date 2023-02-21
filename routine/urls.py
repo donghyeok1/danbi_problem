@@ -25,7 +25,6 @@ routine_result_list = views.RoutineResultViewSet.as_view({
 })
 
 routine_result_detail = views.RoutineResultViewSet.as_view({
-    'get' : 'retrieve',
     'put' : 'update',
     'delete' : 'destroy'
 })

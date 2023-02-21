@@ -226,11 +226,6 @@ class RoutineResultViewSet(ModelViewSet):
         response.data = data
         return response
 
-    def list(self, request, *args, **kwargs):
-        try:
-            pass
-        except RoutineResult.DoesNotExist:
-            pass
     def destroy(self, request, *args, **kwargs):
         routine_result_instance = self.get_object()
         response = super(RoutineResultViewSet, self).destroy(request, *args, **kwargs)

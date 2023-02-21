@@ -13,11 +13,6 @@ day_dict = {
             'SAT' : 5,
             'SUN' : 6
         }
-class RoutineDaySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = RoutineDay
-        fields = ['day']
-
 class RoutineCreateUpdateSerializer(serializers.ModelSerializer):
     days = ListField(write_only=True, min_length=1, max_length=7)
     class Meta:
@@ -25,17 +20,17 @@ class RoutineCreateUpdateSerializer(serializers.ModelSerializer):
         fields = ['title', 'category', 'goal', 'is_alarm', 'days']
     def validate_days(self, days):
         global day_dict
-        day_list = ['월요일', '화요일', '수요일', '목요일', '금요일', '토요일', '일요일']
+        # day_list = ['월요일', '화요일', '수요일', '목요일', '금요일', '토요일', '일요일']
 
         for day in days:
             if day not in day_dict.keys():
                 raise serializers.ValidationError("요일 형식이 올바르지 않습니다.")
-            today_index = datetime.today().weekday()
-            if today_index > day_dict[day]:
-                raise serializers.ValidationError(
-                    f"오늘은 {day_list[today_index]}입니다."
-                    f"{day_list[today_index]}보다 이전의 일정은 등록하실수 업습니다."
-                )
+            # today_index = datetime.today().weekday()
+            # if today_index > day_dict[day]:
+            #     raise serializers.ValidationError(
+            #         f"오늘은 {day_list[today_index]}입니다."
+            #         f"{day_list[today_index]}보다 이전의 일정은 등록하실수 업습니다."
+            #     )
         return days
 
 
