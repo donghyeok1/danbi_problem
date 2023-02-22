@@ -18,7 +18,7 @@ class RoutineCreateAPITest(APITestCase):
     CRUD 중 Create 테스트
     """
     def setUp(self):
-        """ 기본적인 유저 설정 """
+        """ 기본적인 유저 설정 및 유저 토큰 인증 설정 """
         self.email = "test@naver.com"
         self.password = "test123!"
         self.user = self.User.objects.create(

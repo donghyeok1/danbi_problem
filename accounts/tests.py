@@ -168,7 +168,7 @@ class LogOutAPITest(APITestCase):
     유저 로그아웃 테스트
     """
     def setUp(self):
-        """ 기본적인 유저 설정 및 로그아웃 url, token 초기 설정 """
+        """ 기본적인 유저 설정 및 로그아웃 url, 유저 토큰 인증 설정 """
         self.email = "test@naver.com"
         self.password = "test123!"
         self.user = self.User.objects.create(
