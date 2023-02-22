@@ -5,31 +5,21 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase, APIClient
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
 
 
-class AccountAPITest(APITestCase):
+class SignupAPITest(APITestCase):
     User = get_user_model()
     """
     유저 회원가입, 로그인 테스트
     """
     # setUpTestData는 한번만 실행되기 때문에 로그인 테스트를 할 때에는 각 함수들이 실행될 때마다 실행되는 setUp을 씀.
     def setUp(self):
-        """ 기본적인 유저 설정 """
-        self.email = "test@naver.com"
-        self.password = "test123!"
-        self.user = self.User.objects.create(
-            email=self.email,
-            password=make_password(self.password)
-        )
-
         self.signup_url = reverse('user-signup')
-        self.login_url = reverse('user-login')
-        self.logout_url = reverse('user-logout')
 
-        token = TokenObtainPairSerializer.get_token(self.user)
-        self.refresh_token = str(token)
-        self.access_token = str(token.access_token)
-
+    def tearDown(self):
+        self.signup_url = None
+        self.User.objects.all().delete()
 
     def test_signup_success(self):
         """ 회원 가입 성공 """
@@ -97,6 +87,30 @@ class AccountAPITest(APITestCase):
         response = self.client.post(self.signup_url, data=data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+class LogInAPITest(APITestCase):
+    User = get_user_model()
+    """
+    유저 회원가입, 로그인 테스트
+    """
+    # setUpTestData는 한번만 실행되기 때문에 로그인 테스트를 할 때에는 각 함수들이 실행될 때마다 실행되는 setUp을 씀.
+    def setUp(self):
+        """ 기본적인 유저 설정 """
+        self.email = "test@naver.com"
+        self.password = "test123!"
+        self.user = self.User.objects.create(
+            email=self.email,
+            password=make_password(self.password)
+        )
+        self.login_url = reverse('user-login')
+
+
+    def tearDown(self):
+        self.email = None
+        self.password = None
+        self.user = None
+        self.login_url = None
+        self.User.objects.all().delete()
+        OutstandingToken.objects.all().delete()
 
     def test_login_success(self):
         """ 로그인 성공 """
@@ -143,6 +157,38 @@ class AccountAPITest(APITestCase):
 
         response = self.client.post(self.login_url, data=data, format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+class LogOutAPITest(APITestCase):
+    User = get_user_model()
+    """
+    유저 회원가입, 로그인 테스트
+    """
+
+    # setUpTestData는 한번만 실행되기 때문에 로그인 테스트를 할 때에는 각 함수들이 실행될 때마다 실행되는 setUp을 씀.
+    def setUp(self):
+        """ 기본적인 유저 설정 """
+        self.email = "test@naver.com"
+        self.password = "test123!"
+        self.user = self.User.objects.create(
+            email=self.email,
+            password=make_password(self.password)
+        )
+
+        self.logout_url = reverse('user-logout')
+
+        token = TokenObtainPairSerializer.get_token(self.user)
+        self.refresh_token = str(token)
+        self.access_token = str(token.access_token)
+
+    def tearDown(self):
+        self.email = None
+        self.password = None
+        self.user = None
+        self.logout_url = None
+        self.refresh_token = None
+        self.access_token = None
+        self.User.objects.all().delete()
+        OutstandingToken.objects.all().delete()
+        BlacklistedToken.objects.all().delete()
 
     def test_logout_success(self):
         """ 로그아웃 성공 """
@@ -150,10 +196,10 @@ class AccountAPITest(APITestCase):
         data = {
             "refresh_token" : self.refresh_token
         }
-        client = APIClient()
-        client.credentials(
+
+        self.client.credentials(
             HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        response = client.post(self.logout_url, data=data, format='json')
+        response = self.client.post(self.logout_url, data=data, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -180,6 +226,3 @@ class AccountAPITest(APITestCase):
         response = self.client.post(self.logout_url, data=data, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-
-    def tearDown(self):
-        self.User.objects.all().delete()

@@ -7,14 +7,14 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
 
 
-class RoutineAPITest(APITestCase):
+class RoutineCreateAPITest(APITestCase):
     User = get_user_model()
     """
-    유저 회원가입, 로그인 테스트
+    CRUD 중 Create 테스트
     """
-    # setUpTestData는 한번만 실행되기 때문에 로그인 테스트를 할 때에는 각 함수들이 실행될 때마다 실행되는 setUp을 씀.
     def setUp(self):
         """ 기본적인 유저 설정 """
         self.email = "test@naver.com"
@@ -35,6 +35,7 @@ class RoutineAPITest(APITestCase):
 
         self.client.credentials(
             HTTP_AUTHORIZATION="Bearer " + self.access_token)
+
 
 
 
@@ -102,19 +103,20 @@ class RoutineAPITest(APITestCase):
         response = self.client.post(self.create_read_routine_url, data=data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_create_routine_fail_no_goal(self):
+    def test_create_routine_fail_no_day(self):
         """ 루틴 생성 실패 """
 
         data = {
             "title": "title",
             "category": "HOMEWORK",
-            "goal": "",
+            "goal": "Increase your problem-solving skills",
             "is_alarm": True,
-            "days": ["MON", "WED", "FRI"]
+            "days": []
         }
 
         response = self.client.post(self.create_read_routine_url, data=data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
     def tearDown(self):
         self.User.objects.all().delete()
+        OutstandingToken.objects.all().delete()
 
