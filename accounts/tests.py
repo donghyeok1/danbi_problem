@@ -9,17 +9,20 @@ from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, Ou
 
 
 class SignupAPITest(APITestCase):
+    """
+    유저 회원가입 테스트
+    """
     User = get_user_model()
-    """
-    유저 회원가입, 로그인 테스트
-    """
     # setUpTestData는 한번만 실행되기 때문에 로그인 테스트를 할 때에는 각 함수들이 실행될 때마다 실행되는 setUp을 씀.
     def setUp(self):
+        """ 회원가입 url 초기 설정 """
         self.signup_url = reverse('user-signup')
 
     def tearDown(self):
+        """ 회원가입 초기 설정 데이터 초기화 """
         self.signup_url = None
         self.User.objects.all().delete()
+        self.client = None
 
     def test_signup_success(self):
         """ 회원 가입 성공 """
@@ -88,13 +91,13 @@ class SignupAPITest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 class LogInAPITest(APITestCase):
+    """
+    유저 로그인 테스트
+    """
     User = get_user_model()
-    """
-    유저 회원가입, 로그인 테스트
-    """
     # setUpTestData는 한번만 실행되기 때문에 로그인 테스트를 할 때에는 각 함수들이 실행될 때마다 실행되는 setUp을 씀.
     def setUp(self):
-        """ 기본적인 유저 설정 """
+        """ 기본적인 유저 설정 및 로그인 url 설정 """
         self.email = "test@naver.com"
         self.password = "test123!"
         self.user = self.User.objects.create(
@@ -105,6 +108,8 @@ class LogInAPITest(APITestCase):
 
 
     def tearDown(self):
+        """ 로그인 초기 설정 데이터 초기화 """
+        self.client = None
         self.email = None
         self.password = None
         self.user = None
@@ -160,30 +165,29 @@ class LogInAPITest(APITestCase):
 class LogOutAPITest(APITestCase):
     User = get_user_model()
     """
-    유저 회원가입, 로그인 테스트
+    유저 로그아웃 테스트
     """
-
-    # setUpTestData는 한번만 실행되기 때문에 로그인 테스트를 할 때에는 각 함수들이 실행될 때마다 실행되는 setUp을 씀.
     def setUp(self):
-        """ 기본적인 유저 설정 """
+        """ 기본적인 유저 설정 및 로그아웃 url, token 초기 설정 """
         self.email = "test@naver.com"
         self.password = "test123!"
         self.user = self.User.objects.create(
             email=self.email,
             password=make_password(self.password)
         )
-
         self.logout_url = reverse('user-logout')
-
-        token = TokenObtainPairSerializer.get_token(self.user)
-        self.refresh_token = str(token)
-        self.access_token = str(token.access_token)
+        self.token = TokenObtainPairSerializer.get_token(self.user)
+        self.refresh_token = str(self.token)
+        self.access_token = str(self.token.access_token)
 
     def tearDown(self):
+        """ 로그아웃 초기 설정 데이터 초기화 """
+        self.client = None
         self.email = None
         self.password = None
         self.user = None
         self.logout_url = None
+        self.token = None
         self.refresh_token = None
         self.access_token = None
         self.User.objects.all().delete()

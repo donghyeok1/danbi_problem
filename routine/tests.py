@@ -7,7 +7,9 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
+from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
+
+from routine.models import Routine, RoutineResult
 
 
 class RoutineCreateAPITest(APITestCase):
@@ -23,19 +25,26 @@ class RoutineCreateAPITest(APITestCase):
             email=self.email,
             password=make_password(self.password)
         )
-
         self.create_read_routine_url = reverse('routine-list')
-        #self.update_delete_detail_routine_url = reverse('routine-detail')
-        # self.read_routine_result_url = reverse('routine-result-list')
-        # self.update_delete_routine_url = reverse('routine-result-detail')
 
-        token = TokenObtainPairSerializer.get_token(self.user)
-        self.refresh_token = str(token)
-        self.access_token = str(token.access_token)
+        self.token = TokenObtainPairSerializer.get_token(self.user)
+        self.refresh_token = str(self.token)
+        self.access_token = str(self.token.access_token)
 
         self.client.credentials(
             HTTP_AUTHORIZATION="Bearer " + self.access_token)
 
+    def tearDown(self):
+        self.client = None
+        self.email = None
+        self.password = None
+        self.user = None
+        self.create_read_routine_url = None
+        self.token = None
+        self.User.objects.all().delete()
+        OutstandingToken.objects.all().delete()
+        BlacklistedToken.objects.all().delete()
+        Routine.objects.all().delete()
 
 
 
@@ -59,6 +68,7 @@ class RoutineCreateAPITest(APITestCase):
             'msg': 'You have successfully created the routine.',
             'status': 'ROUTINE_CREATE_OK'
         }, response.json()['message'])
+
 
 
     def test_create_routine_fail_no_title(self):
@@ -116,7 +126,4 @@ class RoutineCreateAPITest(APITestCase):
 
         response = self.client.post(self.create_read_routine_url, data=data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-    def tearDown(self):
-        self.User.objects.all().delete()
-        OutstandingToken.objects.all().delete()
 
