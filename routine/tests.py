@@ -49,7 +49,6 @@ class RoutineCreateAPITest(APITestCase):
 
         self.User.objects.all().delete()
         OutstandingToken.objects.all().delete()
-        BlacklistedToken.objects.all().delete()
         Routine.objects.all().delete()
 
 
@@ -85,7 +84,7 @@ class RoutineCreateAPITest(APITestCase):
         self.assertIsNotNone(routine_hw_result)
 
         response_mc = self.client.post(self.create_routine_url, data=data_category_miracle, format='json')
-        routine_id = response_hw.data['data']['routine_id']
+        routine_id = response_mc.data['data']['routine_id']
         routine_mc_result = RoutineResult.objects.get(routine_id=routine_id)
 
         self.assertEqual(response_mc.status_code, status.HTTP_201_CREATED)
@@ -127,6 +126,21 @@ class RoutineCreateAPITest(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_create_routine_fail_not_validate_category(self):
+        """ 루틴 생성 실패 : category의 올바르지 않은 데이터 형식 """
+
+        data = {
+            "title": "title",
+            "category": "숙제",
+            "goal": "Increase your problem-solving skills",
+            "is_alarm": True,
+            "days": ["MON", "WED", "FRI"]
+        }
+
+        response = self.client.post(self.create_routine_url, data=data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_create_routine_fail_no_goal(self):
         """ 루틴 생성 실패 : goal 공란 """
 
@@ -135,6 +149,21 @@ class RoutineCreateAPITest(APITestCase):
             "category": "HOMEWORK",
             "goal": "",
             "is_alarm": True,
+            "days": ["MON", "WED", "FRI"]
+        }
+
+        response = self.client.post(self.create_routine_url, data=data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create_routine_fail_not_validate_is_alarm(self):
+        """ 루틴 생성 실패 : category의 올바르지 않은 데이터 형식 """
+
+        data = {
+            "title": "title",
+            "category": "숙제",
+            "goal": "Increase your problem-solving skills",
+            "is_alarm": '네',
             "days": ["MON", "WED", "FRI"]
         }
 
@@ -151,6 +180,21 @@ class RoutineCreateAPITest(APITestCase):
             "goal": "Increase your problem-solving skills",
             "is_alarm": True,
             "days": []
+        }
+
+        response = self.client.post(self.create_routine_url, data=data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create_routine_fail_not_validate_day(self):
+        """ 루틴 생성 실패 : days의 올바르지 않은 데이터 형식 """
+
+        data = {
+            "title": "title",
+            "category": "HOMEWORK",
+            "goal": "Increase your problem-solving skills",
+            "is_alarm": True,
+            "days": ["월요일"]
         }
 
         response = self.client.post(self.create_routine_url, data=data, format='json')
@@ -208,7 +252,7 @@ class RoutineUpdateAPITest(APITestCase):
         self.client1 = self.client
         self.client2 = self.client
 
-        self.client1.credentials(
+        self.client.credentials(
             HTTP_AUTHORIZATION="Bearer " + self.user1_access_token)
         self.client2.credentials(
             HTTP_AUTHORIZATION="Bearer " + self.user2_access_token)
@@ -223,23 +267,30 @@ class RoutineUpdateAPITest(APITestCase):
 
         user2_routine = {
             "title": "user2의 루틴",
-            "category": "",
+            "category": "MIRACLE",
             "goal": "user1 루틴 테스트 코드 통과하기!",
             "is_alarm": True,
             "days": ["MON", "WED", "FRI"]
         }
 
+        self.client.credentials(
+            HTTP_AUTHORIZATION="Bearer " + self.user1_access_token)
         response_user1 = self.client1.post(self.create_routine_url, data=user1_routine, format='json')
-        print(response_user1.data)
         self.user1_routine_id = response_user1.data['data']['routine_id']
 
         response_user2 = self.client2.post(self.create_routine_url, data=user2_routine, format='json')
         self.user2_routine_id = response_user2.data['data']['routine_id']
 
+        self.user1_update_url = self.create_routine_url + str(self.user1_routine_id) + '/'
+        self.user2_update_url = self.create_routine_url + str(self.user2_routine_id) + '/'
+
     def tearDown(self):
         """ 루틴 수정 초기 설정 데이터 초기화 """
-        self.client = None
+        self.client1 = None
+        self.client2 = None
         self.create_routine_url = None
+        self.user1_update_url = None
+        self.user2_update_url = None
 
         self.user1_routine_id = None
         self.user2_routine_id = None
@@ -260,13 +311,12 @@ class RoutineUpdateAPITest(APITestCase):
 
         self.User.objects.all().delete()
         OutstandingToken.objects.all().delete()
-        BlacklistedToken.objects.all().delete()
         Routine.objects.all().delete()
 
 
 
     def test_update_routine_success(self):
-        """ 루틴 수정 성공 """
+        """ 루틴 수정 성공 : 유저 2명 """
 
         user1_update_data = {
             "title" : "user1의 수정 루틴",
@@ -284,95 +334,141 @@ class RoutineUpdateAPITest(APITestCase):
             "days": ["WED", "FRI"]
         }
 
-        user1_update_url = self.create_routine_url + self.user1_routine_id
-        print(user1_update_url)
+        user1_response = self.client1.put(self.user1_update_url, data=user1_update_data, format='json')
 
-        # response = self.client1.post(self.create_read_routine_url, data=data, format='json')
-        # routine_id = response.data['data']['routine_id']
-        # routine_result = RoutineResult.objects.get(routine_id=routine_id)
-        # self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        # self.assertEqual({
-        #     'msg': 'You have successfully created the routine.',
-        #     'status': 'ROUTINE_CREATE_OK'
-        # }, response.json()['message'])
-        # self.assertIsNotNone(routine_result)
+        self.assertEqual(user1_response.status_code, status.HTTP_200_OK)
+        self.assertEqual({
+            "msg": "The routine has been modified.",
+            "status": "ROUTINE_UPDATE_OK"
+        }, user1_response.json()['message'])
+
+        user2_response = self.client2.put(self.user2_update_url, data=user2_update_data, format='json')
+
+        self.assertEqual(user2_response.status_code, status.HTTP_200_OK)
+        self.assertEqual({
+            "msg": "The routine has been modified.",
+            "status": "ROUTINE_UPDATE_OK"
+        }, user2_response.json()['message'])
 
 
 
-    # def test_create_routine_fail_no_title(self):
-    #     """ 루틴 생성 실패 : title 공란 """
-    #
-    #     data = {
-    #         "title": "",
-    #         "category": "HOMEWORK",
-    #         "goal": "Increase your problem-solving skills",
-    #         "is_alarm": True,
-    #         "days": ["MON", "WED", "FRI"]
-    #     }
-    #
-    #     response = self.client.post(self.create_read_routine_url, data=data, format='json')
-    #
-    #     self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-    #
-    # def test_create_routine_fail_no_category(self):
-    #     """ 루틴 생성 실패 : category 공란 """
-    #
-    #     data = {
-    #         "title": "title",
-    #         "category": "",
-    #         "goal": "Increase your problem-solving skills",
-    #         "is_alarm": True,
-    #         "days": ["MON", "WED", "FRI"]
-    #     }
-    #
-    #     response = self.client.post(self.create_read_routine_url, data=data, format='json')
-    #
-    #     self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-    #
-    # def test_create_routine_fail_no_goal(self):
-    #     """ 루틴 생성 실패 : goal 공란 """
-    #
-    #     data = {
-    #         "title": "title",
-    #         "category": "HOMEWORK",
-    #         "goal": "",
-    #         "is_alarm": True,
-    #         "days": ["MON", "WED", "FRI"]
-    #     }
-    #
-    #     response = self.client.post(self.create_read_routine_url, data=data, format='json')
-    #
-    #     self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-    #
-    # def test_create_routine_fail_no_day(self):
-    #     """ 루틴 생성 실패 : days 공란 """
-    #
-    #     data = {
-    #         "title": "title",
-    #         "category": "HOMEWORK",
-    #         "goal": "Increase your problem-solving skills",
-    #         "is_alarm": True,
-    #         "days": []
-    #     }
-    #
-    #     response = self.client.post(self.create_read_routine_url, data=data, format='json')
-    #
-    #     self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-    #
-    # def test_create_routine_fail_no_authorization(self):
-    #     """ 루틴 생성 실패 : 인증 받지 못한 유저 """
-    #
-    #     data = {
-    #         "title": "유효성 테스트",
-    #         "category": "HOMEWORK",
-    #         "goal": "Increase your problem-solving skills",
-    #         "is_alarm": True,
-    #         "days": ["MON", "WED", "FRI"]
-    #     }
-    #
-    #     self.client.credentials(
-    #         HTTP_AUTHORIZATION="Bearer " + self.access_token + "no")
-    #
-    #     response = self.client.post(self.create_read_routine_url, data=data, format='json')
-    #
-    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+    def test_update_routine_fail_no_title(self):
+        """ 루틴 수정 실패 : title 공란 """
+
+        data = {
+            "title": "",
+            "category": "HOMEWORK",
+            "goal": "Increase your problem-solving skills",
+            "is_alarm": True,
+            "days": ["MON", "WED", "FRI"]
+        }
+
+        response = self.client1.put(self.user1_update_url, data=data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_update_routine_fail_no_category(self):
+        """ 루틴 수정 실패 : category 공란 """
+
+        data = {
+            "title": "title",
+            "category": "",
+            "goal": "Increase your problem-solving skills",
+            "is_alarm": True,
+            "days": ["MON", "WED", "FRI"]
+        }
+
+        response = self.client1.put(self.user1_update_url, data=data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_update_routine_fail_not_validate_category(self):
+        """ 루틴 수정 실패 : category의 올바르지 않은 데이터 형식 """
+
+        data = {
+            "title": "title",
+            "category": "숙제",
+            "goal": "Increase your problem-solving skills",
+            "is_alarm": True,
+            "days": ["MON", "WED", "FRI"]
+        }
+
+        response = self.client1.put(self.user1_update_url, data=data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_update_routine_fail_no_goal(self):
+        """ 루틴 수정 실패 : goal 공란 """
+
+        data = {
+            "title": "title",
+            "category": "HOMEWORK",
+            "goal": "",
+            "is_alarm": True,
+            "days": ["MON", "WED", "FRI"]
+        }
+
+        response = self.client1.put(self.user1_update_url, data=data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_update_routine_fail_not_validate_is_alarm(self):
+        """ 루틴 생성 실패 : category의 올바르지 않은 데이터 형식 """
+
+        data = {
+            "title": "title",
+            "category": "숙제",
+            "goal": "Increase your problem-solving skills",
+            "is_alarm": '네',
+            "days": ["MON", "WED", "FRI"]
+        }
+
+        response = self.client1.put(self.user1_update_url, data=data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_update_routine_fail_no_day(self):
+        """ 루틴 수정 실패 : days 공란 """
+
+        data = {
+            "title": "title",
+            "category": "HOMEWORK",
+            "goal": "Increase your problem-solving skills",
+            "is_alarm": True,
+            "days": []
+        }
+
+        response = self.client1.put(self.user1_update_url, data=data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_update_routine_fail_not_validate_day(self):
+        """ 루틴 수정 실패 : days의 올바르지 않은 데이터 형식 """
+
+        data = {
+            "title": "title",
+            "category": "HOMEWORK",
+            "goal": "Increase your problem-solving skills",
+            "is_alarm": True,
+            "days": ["월요일"]
+        }
+
+        response = self.client1.put(self.user1_update_url, data=data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create_routine_fail_no_authorization(self):
+        """ 루틴 수정 실패 : 인가 받지 못한 유저 """
+
+        data = {
+            "title": "유효성 테스트",
+            "category": "HOMEWORK",
+            "goal": "Increase your problem-solving skills",
+            "is_alarm": True,
+            "days": ["MON", "WED", "FRI"]
+        }
+
+        response = self.client2.put(self.user1_update_url, data=data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
