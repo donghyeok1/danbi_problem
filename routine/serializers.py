@@ -90,7 +90,7 @@ class RoutineCreateUpdateSerializer(serializers.ModelSerializer):
 
 
 
-class RoutineResultUpdateDeleteSerializer(serializers.ModelSerializer):
+class RoutineResultUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = RoutineResult
         fields = ['result', 'is_deleted']

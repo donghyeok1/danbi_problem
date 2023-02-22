@@ -2,14 +2,14 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from datetime import date, datetime, timedelta
 from routine.models import Routine, RoutineResult, RoutineDay
-from routine.serializers import RoutineCreateUpdateSerializer, RoutineResultUpdateDeleteSerializer
+from routine.serializers import RoutineCreateUpdateSerializer, RoutineResultUpdateSerializer
 from rest_framework import exceptions
 global day_list
 day_list = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
 
 
 class RoutineViewSet(ModelViewSet):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     queryset = Routine.objects.all()
     serializer_class = RoutineCreateUpdateSerializer
 
@@ -205,7 +205,7 @@ class RoutineViewSet(ModelViewSet):
 class RoutineResultViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated]
     queryset = RoutineResult.objects.all()
-    serializer_class = RoutineResultUpdateDeleteSerializer
+    serializer_class = RoutineResultUpdateSerializer
 
     def get_queryset(self):
         qs = super().get_queryset()
