@@ -1,5 +1,5 @@
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated
 from datetime import date, datetime, timedelta
 from routine.models import Routine, RoutineResult, RoutineDay
 from routine.serializers import RoutineCreateUpdateSerializer, RoutineResultUpdateSerializer
