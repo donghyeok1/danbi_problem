@@ -1,5 +1,4 @@
 django~=3.0.0
 djangorestframework~=3.11.0
 djangorestframework-simplejwt
-django-filter
 mysqlclient
