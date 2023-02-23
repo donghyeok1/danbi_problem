@@ -32,14 +32,14 @@ class SignupSerializer(serializers.ModelSerializer):
         email_regex = re.compile('^[a-zA-Z0-9+-_.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$')
         if not email_regex.match(value):
             raise serializers.ValidationError("이메일 형식이 아닙니다.")
-        return email_regex
+        return email_regex.findall(value)[0]
 
     def validate_password(self, value):
         password_regex = re.compile("^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]{8,}$")
 
         if not password_regex.match(value):
             raise ValidationError('유저의 비밀번호는 8글자 이상이며 특수문자, 숫자를 포함해야 합니다.')
-        return password_regex
+        return password_regex.findall(value)[0]
 
 
     def create(self, validated_data):
