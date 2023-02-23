@@ -1,4 +1,3 @@
-import rest_framework_simplejwt
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password
 from rest_framework import status
@@ -17,6 +16,7 @@ class SignupAPITest(APITestCase):
     def setUp(self):
         """ 회원가입 url 초기 설정 """
         self.signup_url = reverse('user-signup')
+        self.client = APIClient()
 
     def tearDown(self):
         """ 회원가입 초기 설정 데이터 초기화 """
@@ -105,6 +105,7 @@ class LogInAPITest(APITestCase):
             password=make_password(self.password)
         )
         self.login_url = reverse('user-login')
+        self.client = APIClient()
 
 
     def tearDown(self):
@@ -179,6 +180,7 @@ class LogOutAPITest(APITestCase):
         self.token = TokenObtainPairSerializer.get_token(self.user)
         self.refresh_token = str(self.token)
         self.access_token = str(self.token.access_token)
+        self.client = APIClient()
 
     def tearDown(self):
         """ 로그아웃 초기 설정 데이터 초기화 """
