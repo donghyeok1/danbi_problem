@@ -620,7 +620,7 @@ class RoutineREADAPITest(APITestCase):
         """ 루틴 단건 읽기 실패 : 자신의 루틴이 아니거나 존재하지 않는 루틴 """
 
         """ 존재하지 않는 루틴 """
-        response = self.client.get(self.create_routine_url + "3/", format='json')
+        response = self.client.get(self.create_routine_url + "1000/", format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
         """ 자신의 루틴이 아님 """
@@ -707,7 +707,7 @@ class RoutineDELETEAPITest(APITestCase):
         """ 루틴 삭제 실패 : 자신의 루틴이 아니거나 존재하지 않는 루틴 """
 
         """ 존재하지 않는 루틴 """
-        response = self.client.delete(self.create_routine_url + "3/", format='json')
+        response = self.client.delete(self.create_routine_url + "1000/", format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
         """ 자신의 루틴이 아님 """
@@ -986,7 +986,7 @@ class RoutineResultDELETEAPITest(APITestCase):
             "status": "ROUTINE_DELETE_OK"
         }, response.data['message'])
 
-    def test_read_routine_result_fail_no_authorization(self):
+    def test_delete_routine_result_fail_no_authorization(self):
         """ 루틴 결과 조회 실패 : 자신의 루틴이 아니거나 존재하지 않는 루틴 """
 
         """ 존재하지 않는 루틴 """
