@@ -276,6 +276,6 @@
 >
 > **4. 서버 실행**
 > ```bash
-> python manage.py createsuperuse챙ㄷr
+> python manage.py runserver
 > ```
 > 
