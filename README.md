@@ -272,17 +272,10 @@
 > - 그 후, MySQL Workbench를 보면 아래 그림처럼 테이블들이 생긴 것을 볼 수 있다.
 > 
 > ![image](https://user-images.githubusercontent.com/95459089/220861158-1776f24d-b8aa-43d6-9e88-4937460a129b.png)
-> 
-> **backend 하위 폴더에 생성해야 한다!**
-> 
-> 4-1. 3-5에서 저장한 REST API키를 KAKAO_REST_API_KEY에 입력
->
-> 4-2. SECRET_KEY는 자신만의 파이썬 SECRET_KEY 입력
-> 
->
-> 4-3. 3-10에서 설정한 Redirect URI를 KAKAO_REDIRECT_URI에 입력
+\
 >
 > **4. 서버 실행**
 > ```bash
-> python manage.py createsuperuser
+> python manage.py createsuperuse챙ㄷr
 > ```
+> 
