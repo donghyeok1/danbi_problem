@@ -32,7 +32,6 @@ class RoutineViewSet(ModelViewSet):
         return response
 
     def update(self, request, *args, **kwargs):
-
         response = super(RoutineViewSet, self).update(request, *args, **kwargs)
         data = {
             "data": response.data,
