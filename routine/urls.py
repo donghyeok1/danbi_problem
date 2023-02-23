@@ -33,6 +33,6 @@ routine_result_detail = views.RoutineResultViewSet.as_view({
 urlpatterns =[
     path('routines/', routine_list, name='routine-list'),
     path('routines/<int:pk>/', routine_detail, name='routine-detail'),
-    path('routines/<int:pk>/results/', routine_result_list, name='routine-result-list'),
-    path('routines/<int:id>/results/<int:pk>/', routine_result_detail, name='routine-result-detail'),
+    path('routines/<int:pk>/result/', routine_result_list, name='routine-result-list'),
+    path('routines/<int:id>/result/<int:pk>/', routine_result_detail, name='routine-result-detail'),
 ]
