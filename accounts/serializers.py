@@ -4,6 +4,7 @@ import re
 from rest_framework.exceptions import ValidationError
 from django.core.mail.message import EmailMessage
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from django.contrib.auth import authenticate
 
 User = get_user_model()
 
@@ -24,10 +25,6 @@ class SignupSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'email', 'password']
 
-    def to_representation(self, instance):
-        res = {"account_id" : instance.pk}
-        return res
-
     def validate_email(self, value):
         email_regex = re.compile('^[a-zA-Z0-9+-_.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$')
         if not email_regex.match(value):
@@ -44,17 +41,13 @@ class SignupSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         email = validated_data['email']
-        user = User.objects.create(email=email)
-        user.set_password(validated_data['password'])
-        # db에 암호화해서 저장.
-        user.save()
-        email_send = EmailMessage(
-            '회원가입',  # 이메일 제목
-            '회원가입이 완료되었습니다.',  # 내용
-            to=[email],  # 받는 이메일
-        )
-        email_send.send()
-        return user
+        user_exists = User.objects.filter(email=email).exists()
+        if not user_exists:
+            user = User.objects.create_user(**validated_data)
+            user.save()
+            return user
+        else:
+            raise serializers.ValidationError('이미 존재하는 회원의 email 입니다.')
 
 
 
@@ -68,18 +61,14 @@ class LoginSerializer(serializers.ModelSerializer):
     def validate(self, data):
         email = data.get('email', None)
         password = data.get('password', None)
-
-        if User.objects.filter(email=email).exists():
-            user = User.objects.get(email=email)
-
-            if not user.check_password(password):
-                raise serializers.ValidationError("비밀번호가 틀렸습니다.")
-        else:
-            raise serializers.ValidationError("이메일이 존재하지 않습니다.")
-
-        token = TokenObtainPairSerializer.get_token(user)
-        refresh_token = str(token)
-        access_token = str(token.access_token)
+        if email and password:
+            user = authenticate(email=email, password=password)
+            if user:
+                token = TokenObtainPairSerializer.get_token(user)
+                refresh_token = str(token)
+                access_token = str(token.access_token)
+            else:
+                raise serializers.ValidationError("회원 정보가 일치하지 않습니다.")
 
         results = {
             "email": email,
