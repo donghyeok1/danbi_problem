@@ -193,11 +193,11 @@
 >
 > - 요청
 >
-> ![image](https://user-images.githubusercontent.com/95459089/220857961-e804ccb8-8a03-40b3-9bbe-35a48e064e3b.png)
+> ![image](https://user-images.githubusercontent.com/95459089/223625265-ab65ed1b-ce2a-4f8e-8879-a1eb283fd7c9.png)
 >
 > - 응답
 >
-> ![image](https://user-images.githubusercontent.com/95459089/220858026-0772b0c8-929b-4894-957d-f9674015f762.png)
+> ![image](https://user-images.githubusercontent.com/95459089/223625228-3569ea58-013a-4fbf-a166-3d067f30db1d.png)
 
 ### Installation
 
