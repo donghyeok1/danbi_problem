@@ -17,26 +17,13 @@ class RoutineCreateUpdateSerializer(serializers.ModelSerializer):
     days = ListField(write_only=True, min_length=1, max_length=7)
     class Meta:
         model = Routine
-        fields = ['title', 'category', 'goal', 'is_alarm', 'days']
+        fields = ['routine_id','title', 'category', 'goal', 'is_alarm', 'is_deleted', 'days', 'created_at', 'modified_at']
     def validate_days(self, days):
         global day_dict
-        # day_list = ['월요일', '화요일', '수요일', '목요일', '금요일', '토요일', '일요일']
-
         for day in days:
             if day not in day_dict.keys():
                 raise serializers.ValidationError("요일 형식이 올바르지 않습니다.")
-            # today_index = datetime.today().weekday()
-            # if today_index > day_dict[day]:
-            #     raise serializers.ValidationError(
-            #         f"오늘은 {day_list[today_index]}입니다."
-            #         f"{day_list[today_index]}보다 이전의 일정은 등록하실수 업습니다."
-            #     )
         return days
-
-
-    def to_representation(self, instance):
-        res = {"routine_id" : instance.routine_id}
-        return res
 
     def create(self, validated_data):
         days = validated_data.pop('days')
@@ -71,14 +58,14 @@ class RoutineCreateUpdateSerializer(serializers.ModelSerializer):
         instance.alarm = validated_data.get('is_alarm', instance.is_alarm)
         # client에서 특정 데이터를 보내주지 않으면 원래 데이터로 치환.
 
-        day_pre_set = set(days)
+        day_next_set = set(days)
         day_prev_set = set()
 
         for prev in RoutineDay.objects.filter(routine_id=instance):
             day_prev_set.add(prev.day)
 
-        day_delete = day_prev_set - day_pre_set
-        day_create = day_pre_set - day_prev_set
+        day_delete = day_prev_set - day_next_set
+        day_create = day_next_set - day_prev_set
 
         for day in day_delete:
             RoutineDay.objects.filter(routine_id=instance, day=day).delete()

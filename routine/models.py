@@ -3,14 +3,9 @@ from django.db import models
 from danbi_problem import settings
 
 
-class TimestampedModel(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True)
-    modified_at = models.DateTimeField(auto_now=True)
 
-    class MEta:
-        abstract = True
 
-class Routine(TimestampedModel):
+class Routine(models.Model):
     CATEGORY_CHOICE = (
         ('MIRACLE', 'MIRACLE(기상 관련)'),
         ('HOMEWORK', 'HOMEWORK(숙제 관련)'),
@@ -22,11 +17,13 @@ class Routine(TimestampedModel):
     goal = models.CharField(max_length=500)
     is_alarm = models.BooleanField(default=False)
     is_deleted = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.title
 
-class RoutineResult(TimestampedModel):
+class RoutineResult(models.Model):
     RESULT_CHOICE = (
         ('NOT', 'NOT(안함)'),
         ('TRY', 'TRY(시도)'),
@@ -36,8 +33,10 @@ class RoutineResult(TimestampedModel):
     routine_id = models.ForeignKey(Routine, related_name='routine_result_set', on_delete=models.CASCADE)
     result = models.CharField(max_length=5, choices=RESULT_CHOICE, default='NOT')
     is_deleted = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
 
-class RoutineDay(TimestampedModel):
+class RoutineDay(models.Model):
     DAYS = (
         ('MON', '월요일'),
         ('TUE', '화요일'),
@@ -49,3 +48,5 @@ class RoutineDay(TimestampedModel):
     )
     day = models.CharField(max_length=3, choices=DAYS)
     routine_id = models.ForeignKey(Routine, related_name='routine_day_set', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
